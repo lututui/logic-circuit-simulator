@@ -1,3 +1,4 @@
+import math
 import sys
 from enum import Enum
 
@@ -9,14 +10,17 @@ from PySide6.QtWidgets import (
 )
 
 class GateTypes(Enum):
-    TRUE = ('TRUE', lambda : True)
-    FALSE = ('FALSE', lambda : False)
-    OR = ('OR', lambda elements : any(elements))
-    AND = ('AND', lambda elements : all(elements))
+    TRUE = ('TRUE', 0, math.inf, lambda : True)
+    FALSE = ('FALSE', 0, math.inf, lambda : False)
+    OR = ('OR', math.inf, math.inf, lambda elements : any(elements))
+    AND = ('AND', math.inf, math.inf, lambda elements : all(elements))
+    LED = ('LED', 1, 1, None)
 
-    def __init__(self, label, operation):
+    def __init__(self, label, n_inputs, n_outputs, operation):
         self.label = label
         self.operation = operation
+        self.n_inputs = n_inputs
+        self.n_outputs = n_outputs
 
 class GateItem(QGraphicsRectItem):
     def __init__(self, x, y, gate_type : GateTypes, w=80, h=50):
@@ -27,20 +31,22 @@ class GateItem(QGraphicsRectItem):
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsSelectable)
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemSendsGeometryChanges)
 
-        # Input point (blue, left side)
-        self.input_point = QGraphicsEllipseItem(-5, h / 2 - 5, 10, 10, self)
-        self.input_point.setBrush(QBrush(QColor("blue")))
-        self.input_point.setData(0, "input")
-        self.input_point.parent_gate = self
-
-        # Output point (red, right side)
-        self.output_point = QGraphicsEllipseItem(w - 5, h / 2 - 5, 10, 10, self)
-        self.output_point.setBrush(QBrush(QColor("red")))
-        self.output_point.setData(0, "output")
-        self.output_point.parent_gate = self
-
         self.gate_type = gate_type
         self.label = QGraphicsTextItem(self.gate_type.label, parent=self)
+
+        # Input point (blue, left side)
+        if self.gate_type.n_inputs > 0:
+            self.input_point = QGraphicsEllipseItem(-5, h / 2 - 5, 10, 10, self)
+            self.input_point.setBrush(QBrush(QColor("blue")))
+            self.input_point.setData(0, "input")
+            self.input_point.parent_gate = self
+
+        # Output point (red, right side)
+        if self.gate_type.n_outputs > 0:
+            self.output_point = QGraphicsEllipseItem(w - 5, h / 2 - 5, 10, 10, self)
+            self.output_point.setBrush(QBrush(QColor("red")))
+            self.output_point.setData(0, "output")
+            self.output_point.parent_gate = self
 
         # Keep track of connected wires
         self.connected_wires = []
@@ -79,8 +85,12 @@ class LogicCircuitEditor(QGraphicsView):
         # Example gates
         gate1 = GateItem(50, 50, GateTypes.AND)
         gate2 = GateItem(250, 100, GateTypes.OR)
+        gate3 = GateItem(50, 100, GateTypes.TRUE)
+        gate4 = GateItem(250, 50, GateTypes.LED)
         self.scene.addItem(gate1)
         self.scene.addItem(gate2)
+        self.scene.addItem(gate3)
+        self.scene.addItem(gate4)
 
         # Wiring tool state
         self.pending_output = None
@@ -146,7 +156,7 @@ class LogicCircuitEditor(QGraphicsView):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     editor = LogicCircuitEditor()
-    editor.setWindowTitle("Logic Circuit Simulator (Drag-to-Connect Prototype)")
-    editor.resize(600, 400)
+    editor.setWindowTitle("Logic Circuit Simulator")
+    editor.resize(1200, 800)
     editor.show()
     sys.exit(app.exec())
