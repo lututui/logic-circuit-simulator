@@ -104,34 +104,35 @@ class LogicCircuitEditor(QGraphicsView):
             point_type = item.data(0)
             gate = item.parentItem()
 
-            # Step 1: Click on output -> start wire
-            if point_type == "output" and self.pending_output is None:
-                self.pending_output = gate
-                item.setBrush(QBrush(QColor("green")))  # highlight
+            if isinstance(gate, GateItem):
+                # Step 1: Click on output -> start wire
+                if point_type == "output" and self.pending_output is None:
+                    self.pending_output = gate
+                    item.setBrush(QBrush(QColor("green")))  # highlight
 
-                # Start a temporary line
-                start = gate.output_point.sceneBoundingRect().center()
-                self.temp_line = QGraphicsLineItem(start.x(), start.y(), start.x(), start.y())
-                self.temp_line.setZValue(-1)  # behind all interactive items
-                self.temp_line.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
-                self.temp_line.setPen(QPen(Qt.GlobalColor.darkGray, 2, Qt.PenStyle.DashLine))
-                self.scene.addItem(self.temp_line)
-                return
+                    # Start a temporary line
+                    start = gate.output_point.sceneBoundingRect().center()
+                    self.temp_line = QGraphicsLineItem(start.x(), start.y(), start.x(), start.y())
+                    self.temp_line.setZValue(-1)  # behind all interactive items
+                    self.temp_line.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
+                    self.temp_line.setPen(QPen(Qt.GlobalColor.darkGray, 2, Qt.PenStyle.DashLine))
+                    self.scene.addItem(self.temp_line)
+                    return
 
-            # Step 2: Click on input -> finalize wire
-            if point_type == "input" and self.pending_output is not None:
-                src_gate = self.pending_output
-                dst_gate = gate
-                wire = WireItem(src_gate, dst_gate)
-                self.scene.addItem(wire)
+                # Step 2: Click on input -> finalize wire
+                if point_type == "input" and self.pending_output is not None:
+                    src_gate = self.pending_output
+                    dst_gate = gate
+                    wire = WireItem(src_gate, dst_gate)
+                    self.scene.addItem(wire)
 
-                # Reset state
-                src_gate.output_point.setBrush(QBrush(QColor("red")))
-                self.pending_output = None
-                if self.temp_line:
-                    self.scene.removeItem(self.temp_line)
-                    self.temp_line = None
-                return
+                    # Reset state
+                    src_gate.output_point.setBrush(QBrush(QColor("red")))
+                    self.pending_output = None
+                    if self.temp_line:
+                        self.scene.removeItem(self.temp_line)
+                        self.temp_line = None
+                    return
 
         # Clicked elsewhere → cancel
         if self.pending_output:
