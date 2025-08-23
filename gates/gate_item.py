@@ -41,6 +41,8 @@ class GateItem(QGraphicsRectItem):
         eval_result = []
 
         for wire in self.connected_wires:
+            if wire.src_gate == self:
+                continue
             eval_result.append(wire.src_gate.eval())
 
         return eval_result

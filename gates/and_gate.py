@@ -12,4 +12,9 @@ class AndGate(GateItem):
         self.label = QGraphicsTextItem('AND', parent=self)
         
     def eval(self):
+        eval_result = super().eval()
+
+        if len(eval_result) == 0:
+            return None
+
         return all(super().eval())

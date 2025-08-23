@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
 )
 
 from gates.and_gate import AndGate
+from gates.false_gate import FalseGate
 from gates.gate_item import GateItem
 from gates.led_gate import LEDGate
 from gates.or_gate import OrGate
@@ -38,15 +39,20 @@ class LogicCircuitEditor(QGraphicsView):
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
 
+        self.simulation_timers = {}
+
         # Example gates
-        gate1 = AndGate(50, 50)
-        gate2 = OrGate(250, 100)
-        gate3 = TrueGate(50, 100)
-        gate4 = LEDGate(250, 50)
-        self.scene.addItem(gate1)
-        self.scene.addItem(gate2)
-        self.scene.addItem(gate3)
-        self.scene.addItem(gate4)
+        and_gate = AndGate(50, 50)
+        or_gate = OrGate(250, 100)
+        true = TrueGate(50, 100)
+        led = LEDGate(250, 50, self)
+        false = FalseGate(50, 50)
+
+        self.scene.addItem(and_gate)
+        self.scene.addItem(or_gate)
+        self.scene.addItem(true)
+        self.scene.addItem(led)
+        self.scene.addItem(false)
 
         # Wiring tool state
         self.pending_output = None
