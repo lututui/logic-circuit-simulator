@@ -1,61 +1,17 @@
-import math
 import sys
-from enum import Enum
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QBrush, QColor
 from PySide6.QtWidgets import (
     QApplication, QGraphicsScene, QGraphicsView,
-    QGraphicsRectItem, QGraphicsEllipseItem, QGraphicsLineItem, QGraphicsTextItem
+    QGraphicsEllipseItem, QGraphicsLineItem
 )
 
-class GateTypes(Enum):
-    TRUE = ('TRUE', 0, math.inf, lambda : True)
-    FALSE = ('FALSE', 0, math.inf, lambda : False)
-    OR = ('OR', math.inf, math.inf, lambda elements : any(elements))
-    AND = ('AND', math.inf, math.inf, lambda elements : all(elements))
-    LED = ('LED', 1, 1, None)
-
-    def __init__(self, label, n_inputs, n_outputs, operation):
-        self.label = label
-        self.operation = operation
-        self.n_inputs = n_inputs
-        self.n_outputs = n_outputs
-
-class GateItem(QGraphicsRectItem):
-    def __init__(self, x, y, gate_type : GateTypes, w=80, h=50):
-        super().__init__(0, 0, w, h)
-        self.setPos(x, y)
-        self.setBrush(QBrush(QColor("lightgray")))
-        self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsMovable)
-        self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsSelectable)
-        self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemSendsGeometryChanges)
-
-        self.gate_type = gate_type
-        self.label = QGraphicsTextItem(self.gate_type.label, parent=self)
-
-        # Input point (blue, left side)
-        if self.gate_type.n_inputs > 0:
-            self.input_point = QGraphicsEllipseItem(-5, h / 2 - 5, 10, 10, self)
-            self.input_point.setBrush(QBrush(QColor("blue")))
-            self.input_point.setData(0, "input")
-            self.input_point.parent_gate = self
-
-        # Output point (red, right side)
-        if self.gate_type.n_outputs > 0:
-            self.output_point = QGraphicsEllipseItem(w - 5, h / 2 - 5, 10, 10, self)
-            self.output_point.setBrush(QBrush(QColor("red")))
-            self.output_point.setData(0, "output")
-            self.output_point.parent_gate = self
-
-        # Keep track of connected wires
-        self.connected_wires = []
-
-    def itemChange(self, change, value):
-        if change == QGraphicsRectItem.GraphicsItemChange.ItemPositionChange:
-            for wire in self.connected_wires:
-                wire.update_position()
-        return super().itemChange(change, value)
+from gates.and_gate import AndGate
+from gates.gate_item import GateItem
+from gates.led_gate import LEDGate
+from gates.or_gate import OrGate
+from gates.true_gate import TrueGate
 
 
 class WireItem(QGraphicsLineItem):
@@ -83,10 +39,10 @@ class LogicCircuitEditor(QGraphicsView):
         self.setScene(self.scene)
 
         # Example gates
-        gate1 = GateItem(50, 50, GateTypes.AND)
-        gate2 = GateItem(250, 100, GateTypes.OR)
-        gate3 = GateItem(50, 100, GateTypes.TRUE)
-        gate4 = GateItem(250, 50, GateTypes.LED)
+        gate1 = AndGate(50, 50)
+        gate2 = OrGate(250, 100)
+        gate3 = TrueGate(50, 100)
+        gate4 = LEDGate(250, 50)
         self.scene.addItem(gate1)
         self.scene.addItem(gate2)
         self.scene.addItem(gate3)
