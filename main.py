@@ -4,7 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QBrush, QColor
 from PySide6.QtWidgets import (
     QApplication, QGraphicsScene, QGraphicsView,
-    QGraphicsEllipseItem, QGraphicsLineItem
+    QGraphicsEllipseItem, QGraphicsLineItem, QMainWindow
 )
 
 from gates.and_gate import AndGate
@@ -13,6 +13,7 @@ from gates.gate_item import GateItem
 from gates.led_gate import LEDGate
 from gates.or_gate import OrGate
 from gates.true_gate import TrueGate
+from toolbar_action import Toolbar
 
 
 class WireItem(QGraphicsLineItem):
@@ -57,6 +58,7 @@ class LogicCircuitEditor(QGraphicsView):
         # Wiring tool state
         self.pending_output = None
         self.temp_line = None  # temporary line while dragging
+        self.current_tool = "Pointer"
 
     def mousePressEvent(self, event):
         pos = event.position().toPoint()
@@ -116,10 +118,22 @@ class LogicCircuitEditor(QGraphicsView):
         super().mouseMoveEvent(event)
 
 
+class LogicCircuitSimulatorWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Logic Circuit Simulator")
+        self.resize(1200, 800)
+
+        self.editor = LogicCircuitEditor()
+        self.setCentralWidget(self.editor)
+
+        self.addToolBar(Toolbar(self.editor))
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    editor = LogicCircuitEditor()
-    editor.setWindowTitle("Logic Circuit Simulator")
-    editor.resize(1200, 800)
-    editor.show()
+    window = LogicCircuitSimulatorWindow()
+
+    window.show()
+
     sys.exit(app.exec())
