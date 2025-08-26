@@ -56,7 +56,7 @@ class LogicCircuitEditor(QGraphicsView):
         self.scene.addItem(false)
 
         # Wiring tool state
-        self.pending_output = None
+        self.pending_endpoint = None   # (gate, point_type)
         self.temp_line = None  # temporary line while dragging
         self.current_tool = "Pointer"
 
@@ -69,13 +69,19 @@ class LogicCircuitEditor(QGraphicsView):
             gate = item.parentItem()
 
             if isinstance(gate, GateItem):
-                # Step 1: Click on output -> start wire
-                if point_type == "output" and self.pending_output is None:
-                    self.pending_output = gate
-                    item.setBrush(QBrush(QColor("green")))  # highlight
+                # Step 1: First click (either output OR input)
+                if self.pending_endpoint is None:
+                    self.pending_endpoint = (gate, point_type)
+                    item.setBrush(QBrush(QColor("green")))
 
-                    # Start a temporary line
-                    start = gate.output_point.sceneBoundingRect().center()
+                    if point_type == "output":
+                        start = gate.output_point.sceneBoundingRect().center()
+                    elif point_type == "input":
+                        start = gate.input_point.sceneBoundingRect().center()
+                    else:
+                        return
+
+                    # Start temporary dashed wire
                     self.temp_line = QGraphicsLineItem(start.x(), start.y(), start.x(), start.y())
                     self.temp_line.setZValue(-1)  # behind all interactive items
                     self.temp_line.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
@@ -83,25 +89,32 @@ class LogicCircuitEditor(QGraphicsView):
                     self.scene.addItem(self.temp_line)
                     return
 
-                # Step 2: Click on input -> finalize wire
-                if point_type == "input" and self.pending_output is not None:
-                    src_gate = self.pending_output
-                    dst_gate = gate
+                # Step 2: Second click must be the opposite type
+                prev_gate, prev_type = self.pending_endpoint
+                if prev_type != point_type:  # only allow input→output or output→input
+                    if prev_type == "output" and point_type == "input":
+                        src_gate = prev_gate
+                        dst_gate = gate
+                    elif prev_type == "input" and point_type == "output":
+                        src_gate = gate
+                        dst_gate = prev_gate
+                    else:
+                        return
+
                     wire = WireItem(src_gate, dst_gate)
                     self.scene.addItem(wire)
 
-                    # Reset state
-                    src_gate.output_point.setBrush(QBrush(QColor("red")))
-                    self.pending_output = None
-                    if self.temp_line:
-                        self.scene.removeItem(self.temp_line)
-                        self.temp_line = None
-                    return
-
         # Clicked elsewhere → cancel
-        if self.pending_output:
-            self.pending_output.output_point.setBrush(QBrush(QColor("red")))
-            self.pending_output = None
+        if self.pending_endpoint:
+            gate, io_type = self.pending_endpoint
+
+            if io_type == "output":
+                gate.output_point.setBrush(QBrush(QColor("red")))
+            elif io_type == "input":
+                gate.input_point.setBrush(QBrush(QColor("blue")))
+
+            self.pending_endpoint = None
+
             if self.temp_line:
                 self.scene.removeItem(self.temp_line)
                 self.temp_line = None
@@ -110,9 +123,16 @@ class LogicCircuitEditor(QGraphicsView):
 
     def mouseMoveEvent(self, event):
         """Update temporary wire while dragging"""
-        if self.pending_output and self.temp_line:
-            start = self.pending_output.output_point.sceneBoundingRect().center()
-            end = self.mapToScene(event.position().toPoint())
+        if self.pending_endpoint and self.temp_line:
+            gate, io_type = self.pending_endpoint
+
+            if io_type == "output":
+                start = gate.output_point.sceneBoundingRect().center()
+                end = self.mapToScene(event.position().toPoint())
+            else:
+                start = self.mapToScene(event.position().toPoint())
+                end = gate.input_point.sceneBoundingRect().center()
+
             self.temp_line.setLine(start.x(), start.y(), end.x(), end.y())
 
         super().mouseMoveEvent(event)
