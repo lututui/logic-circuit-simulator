@@ -32,6 +32,11 @@ class WireItem(QGraphicsLineItem):
         p2 = self.dst_gate.input_point.sceneBoundingRect().center()
         self.setLine(p1.x(), p1.y(), p2.x(), p2.y())
 
+    def remove(self):
+        self.src_gate.connected_wires.remove(self)
+        self.dst_gate.connected_wires.remove(self)
+        self.scene().removeItem(self)
+
 
 class LogicCircuitEditor(QGraphicsView):
     def __init__(self):
@@ -60,50 +65,49 @@ class LogicCircuitEditor(QGraphicsView):
         self.temp_line = None  # temporary line while dragging
         self.current_tool = "Pointer"
 
-    def mousePressEvent(self, event):
-        pos = event.position().toPoint()
-        item = self.itemAt(pos)
+    def _handle_wiring_event(self, item: QGraphicsEllipseItem):
+        point_type = item.data(0)
+        gate = item.parentItem()
 
-        if isinstance(item, QGraphicsEllipseItem):
-            point_type = item.data(0)
-            gate = item.parentItem()
+        if isinstance(gate, GateItem):
+            # Step 1: First click (either output OR input)
+            if self.pending_endpoint is None:
+                self.pending_endpoint = (gate, point_type)
+                item.setBrush(QBrush(QColor("green")))
 
-            if isinstance(gate, GateItem):
-                # Step 1: First click (either output OR input)
-                if self.pending_endpoint is None:
-                    self.pending_endpoint = (gate, point_type)
-                    item.setBrush(QBrush(QColor("green")))
-
-                    if point_type == "output":
-                        start = gate.output_point.sceneBoundingRect().center()
-                    elif point_type == "input":
-                        start = gate.input_point.sceneBoundingRect().center()
-                    else:
-                        return
-
-                    # Start temporary dashed wire
-                    self.temp_line = QGraphicsLineItem(start.x(), start.y(), start.x(), start.y())
-                    self.temp_line.setZValue(-1)  # behind all interactive items
-                    self.temp_line.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
-                    self.temp_line.setPen(QPen(Qt.GlobalColor.darkGray, 2, Qt.PenStyle.DashLine))
-                    self.scene.addItem(self.temp_line)
+                if point_type == "output":
+                    start = gate.output_point.sceneBoundingRect().center()
+                elif point_type == "input":
+                    start = gate.input_point.sceneBoundingRect().center()
+                else:
                     return
 
-                # Step 2: Second click must be the opposite type
-                prev_gate, prev_type = self.pending_endpoint
-                if prev_type != point_type:  # only allow input→output or output→input
-                    if prev_type == "output" and point_type == "input":
-                        src_gate = prev_gate
-                        dst_gate = gate
-                    elif prev_type == "input" and point_type == "output":
-                        src_gate = gate
-                        dst_gate = prev_gate
-                    else:
-                        return
+                # Start temporary dashed wire
+                self.temp_line = QGraphicsLineItem(start.x(), start.y(), start.x(), start.y())
+                self.temp_line.setZValue(-1)  # behind all interactive items
+                self.temp_line.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
+                self.temp_line.setPen(QPen(Qt.GlobalColor.darkGray, 2, Qt.PenStyle.DashLine))
+                self.scene.addItem(self.temp_line)
+                return
 
-                    wire = WireItem(src_gate, dst_gate)
-                    self.scene.addItem(wire)
+            # Step 2: Second click must be the opposite type
+            prev_gate, prev_type = self.pending_endpoint
+            if prev_type != point_type:  # only allow input→output or output→input
+                if prev_type == "output" and point_type == "input":
+                    src_gate = prev_gate
+                    dst_gate = gate
+                elif prev_type == "input" and point_type == "output":
+                    src_gate = gate
+                    dst_gate = prev_gate
+                else:
+                    return
 
+                wire = WireItem(src_gate, dst_gate)
+                self.scene.addItem(wire)
+
+        self._handle_wiring_event_cancel()
+
+    def _handle_wiring_event_cancel(self):
         # Clicked elsewhere → cancel
         if self.pending_endpoint:
             gate, io_type = self.pending_endpoint
@@ -118,6 +122,21 @@ class LogicCircuitEditor(QGraphicsView):
             if self.temp_line:
                 self.scene.removeItem(self.temp_line)
                 self.temp_line = None
+
+
+    def mousePressEvent(self, event):
+        pos = event.position().toPoint()
+        item = self.itemAt(pos)
+
+        if self.current_tool == "Pointer":
+            if isinstance(item, QGraphicsEllipseItem):
+                self._handle_wiring_event(item)
+                return
+
+            self._handle_wiring_event_cancel()
+        elif self.current_tool == "Wire Cutter":
+            if isinstance(item, WireItem):
+                item.remove()
 
         super().mousePressEvent(event)
 

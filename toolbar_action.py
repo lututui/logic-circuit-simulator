@@ -25,5 +25,3 @@ class Toolbar(QToolBar):
 
     def set_tool(self, object_name):
         self.editor.current_tool = object_name
-
-        print(self.editor.current_tool)
