@@ -46,3 +46,9 @@ class GateItem(QGraphicsRectItem):
             eval_result.append(wire.src_gate.eval())
 
         return eval_result
+
+    def remove(self):
+        for wire in list(self.connected_wires):
+            wire.remove()
+
+        self.scene().removeItem(self)

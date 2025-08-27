@@ -14,7 +14,8 @@ class Toolbar(QToolBar):
 
         actions = [
             QAction(qtawesome.icon('fa6s.arrow-pointer'), "Pointer", self, checkable=True, checked=True),
-            QAction(qtawesome.icon('fa6s.scissors'), "Wire Cutter", self, checkable=True)
+            QAction(qtawesome.icon('fa6s.scissors'), "Wire Cutter", self, checkable=True),
+            QAction(qtawesome.icon('fa6s.trash'), "Remove Gate", self, checkable=True),
         ]
 
         for action in actions:

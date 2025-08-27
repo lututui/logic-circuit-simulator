@@ -137,6 +137,9 @@ class LogicCircuitEditor(QGraphicsView):
         elif self.current_tool == "Wire Cutter":
             if isinstance(item, WireItem):
                 item.remove()
+        elif self.current_tool == "Remove Gate":
+            if isinstance(item, GateItem):
+                item.remove()
 
         super().mousePressEvent(event)
 
