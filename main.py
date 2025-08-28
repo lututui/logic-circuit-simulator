@@ -55,19 +55,16 @@ class LogicCircuitEditor(QGraphicsView):
         self.setScene(self.scene)
 
         self.simulation_timers = {}
+        self.gates = [
+            AndGate(50, 50, self),
+            OrGate(250, 100, self),
+            TrueGate(50, 100, self),
+            LEDGate(250, 50, self),
+            FalseGate(50, 50, self),
+        ]
 
-        # Example gates
-        and_gate = AndGate(50, 50, self)
-        or_gate = OrGate(250, 100, self)
-        true = TrueGate(50, 100, self)
-        led = LEDGate(250, 50, self)
-        false = FalseGate(50, 50, self)
-
-        self.scene.addItem(and_gate)
-        self.scene.addItem(or_gate)
-        self.scene.addItem(true)
-        self.scene.addItem(led)
-        self.scene.addItem(false)
+        for gate in self.gates:
+            self.scene.addItem(gate)
 
         # Wiring tool state
         self.pending_endpoint = None   # (gate, point_type)
@@ -143,6 +140,22 @@ class LogicCircuitEditor(QGraphicsView):
                 return
 
             self._handle_wiring_event_cancel()
+        elif self.current_tool.startswith("GATE_"):
+            scene_pos = self.mapToScene(event.position().toPoint())
+
+            possible_gates = {
+                'GATE_FALSE': FalseGate,
+                'GATE_TRUE': TrueGate,
+                'GATE_LED': LEDGate,
+                'GATE_AND': AndGate,
+                'GATE_OR': OrGate,
+            }
+
+            gate = possible_gates.get(self.current_tool)
+            new_gate = gate(scene_pos.x() - 40, scene_pos.y() - 20, self)
+
+            self.gates.append(new_gate)
+            self.scene.addItem(new_gate)
 
         super().mousePressEvent(event)
 

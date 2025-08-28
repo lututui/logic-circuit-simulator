@@ -24,5 +24,21 @@ class Toolbar(QToolBar):
 
             action.triggered.connect(lambda checked, act=action.text(): self.set_tool(act))
 
+        self.addSeparator()
+
+        gates = [
+            QAction("FALSE", self, checkable=True, whatsThis='False Emitter'),
+            QAction("TRUE", self, checkable=True, whatsThis='True Emitter'),
+            QAction("LED", self, checkable=True, whatsThis='LED Output'),
+            QAction("OR", self, checkable=True, whatsThis='Or Gate'),
+            QAction("AND", self, checkable=True, whatsThis='And Gate'),
+        ]
+
+        for gate in gates:
+            group.addAction(gate)
+            self.addAction(gate)
+
+            gate.triggered.connect(lambda checked, act=gate.text(): self.set_tool(f'GATE_{act}'))
+
     def set_tool(self, object_name):
         self.editor.current_tool = object_name
