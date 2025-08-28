@@ -17,8 +17,11 @@ from toolbar_action import Toolbar
 
 
 class WireItem(QGraphicsLineItem):
-    def __init__(self, src_gate: GateItem, dst_gate: GateItem):
+    def __init__(self, src_gate, dst_gate, editor):
         super().__init__()
+
+        self.editor = editor
+
         self.src_gate = src_gate
         self.dst_gate = dst_gate
         self.setPen(QPen(Qt.GlobalColor.black, 2))
@@ -37,6 +40,12 @@ class WireItem(QGraphicsLineItem):
         self.dst_gate.connected_wires.remove(self)
         self.scene().removeItem(self)
 
+    def mousePressEvent(self, event, /):
+        if self.editor.current_tool == "Wire Cutter":
+            self.remove()
+
+        super().mousePressEvent(event)
+
 
 class LogicCircuitEditor(QGraphicsView):
     def __init__(self):
@@ -48,11 +57,11 @@ class LogicCircuitEditor(QGraphicsView):
         self.simulation_timers = {}
 
         # Example gates
-        and_gate = AndGate(50, 50)
-        or_gate = OrGate(250, 100)
-        true = TrueGate(50, 100)
+        and_gate = AndGate(50, 50, self)
+        or_gate = OrGate(250, 100, self)
+        true = TrueGate(50, 100, self)
         led = LEDGate(250, 50, self)
-        false = FalseGate(50, 50)
+        false = FalseGate(50, 50, self)
 
         self.scene.addItem(and_gate)
         self.scene.addItem(or_gate)
@@ -102,7 +111,7 @@ class LogicCircuitEditor(QGraphicsView):
                 else:
                     return
 
-                wire = WireItem(src_gate, dst_gate)
+                wire = WireItem(src_gate, dst_gate, self)
                 self.scene.addItem(wire)
 
         self._handle_wiring_event_cancel()
@@ -134,12 +143,6 @@ class LogicCircuitEditor(QGraphicsView):
                 return
 
             self._handle_wiring_event_cancel()
-        elif self.current_tool == "Wire Cutter":
-            if isinstance(item, WireItem):
-                item.remove()
-        elif self.current_tool == "Remove Gate":
-            if isinstance(item, GateItem):
-                item.remove()
 
         super().mousePressEvent(event)
 

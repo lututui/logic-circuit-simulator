@@ -5,12 +5,12 @@ from gates.gate_item import GateItem
 
 
 class LEDGate(GateItem):
-    def __init__(self, x, y, circuit, w=80, h=50):
-        super().__init__(x, y, 1, 0, w, h)
+    def __init__(self, x, y, editor, w=80, h=50):
+        super().__init__(x, y, 1, 0, editor, w, h)
 
-        circuit.simulation_timers[self] = QTimer()
-        circuit.simulation_timers[self].timeout.connect(self.update_color)
-        circuit.simulation_timers[self].start(33)
+        editor.simulation_timers[self] = QTimer()
+        editor.simulation_timers[self].timeout.connect(self.update_color)
+        editor.simulation_timers[self].start(33)
 
         self.eval_result = None
 

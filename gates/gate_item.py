@@ -3,12 +3,12 @@ from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsEllipseItem
 
 
 class GateItem(QGraphicsRectItem):
-    def __init__(self, x, y, n_inputs, n_outputs, w=80, h=50):
+    def __init__(self, x, y, n_inputs, n_outputs, editor, w=80, h=50):
         super().__init__(0, 0, w, h)
+        self.editor = editor
         self.setPos(x, y)
         self.setBrush(QBrush(QColor("lightgray")))
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsMovable)
-        self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsSelectable)
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemSendsGeometryChanges)
 
         self.n_inputs = n_inputs
@@ -52,3 +52,10 @@ class GateItem(QGraphicsRectItem):
             wire.remove()
 
         self.scene().removeItem(self)
+
+    def mousePressEvent(self, event, /):
+        if self.editor.current_tool == "Remove Gate":
+            self.remove()
+
+        super().mousePressEvent(event)
+
