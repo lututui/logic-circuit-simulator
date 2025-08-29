@@ -16,7 +16,12 @@ class NotGate(GateItem):
         if len(self.connected_inputs) == 0:
             return None
 
-        return self.connected_inputs[0].src_gate.state
+        return not self.connected_inputs[0].src_gate.state
+
+    def boundingRect(self):
+        # Add margin for the circle (output bubble) + pen thickness
+        margin = 4
+        return self.rect().adjusted(-margin, -margin, margin + 10, margin)
 
     def paint(self, painter: QPainter, option, widget=None):
         painter.setPen(QPen(QColor("black"), 2))
