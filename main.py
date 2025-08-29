@@ -1,6 +1,6 @@
 import sys
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPen, QBrush, QColor
 from PySide6.QtWidgets import (
     QApplication, QGraphicsScene, QGraphicsView,
@@ -13,6 +13,7 @@ from gates.gate_item import GateItem
 from gates.led_gate import LEDGate
 from gates.or_gate import OrGate
 from gates.true_gate import TrueGate
+from gates.not_gate import NotGate
 from toolbar_action import Toolbar
 
 
@@ -67,9 +68,25 @@ class LogicCircuitEditor(QGraphicsView):
             self.scene.addItem(gate)
 
         # Wiring tool state
-        self.pending_endpoint = None   # (gate, point_type)
+        self.pending_endpoint = None  # (gate, point_type)
         self.temp_line = None  # temporary line while dragging
         self.current_tool = "Pointer"
+
+        self.sim_timer = QTimer()
+        self.sim_timer.timeout.connect(self.simulation_step)
+        self.sim_timer.start(50)
+
+    def simulation_step(self):
+        changed = False
+        for gate in self.gates:
+            new_state = gate.compute_output()  # pure function
+            if new_state != gate.state:
+                gate.state = new_state
+                gate.update_graphics()
+                changed = True
+        # Optionally: loop until stable (important for feedback)
+        if changed:
+            self.simulation_step()
 
     def _handle_wiring_event(self, item: QGraphicsEllipseItem):
         point_type = item.data(0)
@@ -129,7 +146,6 @@ class LogicCircuitEditor(QGraphicsView):
                 self.scene.removeItem(self.temp_line)
                 self.temp_line = None
 
-
     def mousePressEvent(self, event):
         pos = event.position().toPoint()
         item = self.itemAt(pos)
@@ -149,6 +165,7 @@ class LogicCircuitEditor(QGraphicsView):
                 'GATE_LED': LEDGate,
                 'GATE_AND': AndGate,
                 'GATE_OR': OrGate,
+                'GATE_NOT': NotGate,
             }
 
             gate = possible_gates.get(self.current_tool)

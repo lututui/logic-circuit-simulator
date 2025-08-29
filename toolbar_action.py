@@ -32,6 +32,7 @@ class Toolbar(QToolBar):
             QAction("LED", self, checkable=True, whatsThis='LED Output'),
             QAction("OR", self, checkable=True, whatsThis='Or Gate'),
             QAction("AND", self, checkable=True, whatsThis='And Gate'),
+            QAction("NOT", self, checkable=True, whatsThis='Not Gate'),
         ]
 
         for gate in gates:

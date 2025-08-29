@@ -11,5 +11,5 @@ class FalseGate(GateItem):
 
         self.label = QGraphicsTextItem('FALSE', parent=self)
 
-    def eval(self):
+    def compute_output(self):
         return False

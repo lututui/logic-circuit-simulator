@@ -30,6 +30,10 @@ class GateItem(QGraphicsRectItem):
 
         # Keep track of connected wires
         self.connected_wires = []
+        self.state = None
+
+    def update_graphics(self):
+        return
 
     def itemChange(self, change, value):
         if change == QGraphicsRectItem.GraphicsItemChange.ItemPositionChange:

@@ -12,5 +12,5 @@ class TrueGate(GateItem):
 
         self.label = QGraphicsTextItem('TRUE', parent=self)
 
-    def eval(self):
+    def compute_output(self):
         return True

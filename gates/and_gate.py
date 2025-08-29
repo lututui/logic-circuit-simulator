@@ -11,10 +11,11 @@ class AndGate(GateItem):
 
         self.label = QGraphicsTextItem('AND', parent=self)
         
-    def eval(self):
-        eval_result = super().eval()
-
-        if len(eval_result) == 0:
+    def compute_output(self):
+        inputs = []
+        for wire in self.connected_wires:
+            if wire.dst_gate == self:  # incoming wire
+                inputs.append(wire.src_gate.state)
+        if None in inputs:  # not enough info yet
             return None
-
-        return all(super().eval())
+        return all(inputs)

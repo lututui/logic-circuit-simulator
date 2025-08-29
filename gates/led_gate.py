@@ -8,21 +8,8 @@ class LEDGate(GateItem):
     def __init__(self, x, y, editor, w=80, h=50):
         super().__init__(x, y, 1, 0, editor, w, h)
 
-        editor.simulation_timers[self] = QTimer()
-        editor.simulation_timers[self].timeout.connect(self.update_color)
-        editor.simulation_timers[self].start(33)
-
-        self.eval_result = None
-
-    def update_color(self):
-        new_eval = self.eval()
-
-        if self.eval_result == new_eval:
-            return
-
-        self.eval_result = new_eval
-
-        match self.eval_result:
+    def update_graphics(self):
+        match self.state:
             case None:
                 self.setBrush(QBrush(QColor("lightgray")))
             case True:
@@ -30,12 +17,8 @@ class LEDGate(GateItem):
             case False:
                 self.setBrush(QBrush(QColor("red")))
 
-    def eval(self):
-        result = super().eval()
-
-        if len(result) == 0:
-            return None
-        elif len(result) == 1:
-            return result[0]
-        else:
-            raise RuntimeError('Unsupported operation')
+    def compute_output(self):
+        for wire in self.connected_wires:
+            if wire.dst_gate == self:
+                return wire.src_gate.state
+        return None
