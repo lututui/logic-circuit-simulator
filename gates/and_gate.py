@@ -1,5 +1,6 @@
 import math
 
+from PySide6.QtGui import QPainter, QPen, QColor, QBrush, QPainterPath
 from PySide6.QtWidgets import QGraphicsTextItem
 
 from gates.gate_item import GateItem
@@ -18,3 +19,20 @@ class AndGate(GateItem):
             return None
 
         return all(inputs)
+
+    def paint(self, painter: QPainter, option, widget=None):
+        painter.setPen(QPen(QColor("black"), 2))
+        painter.setBrush(QBrush(QColor("lightgray")))
+
+        w = self.rect().width()
+        h = self.rect().height()
+
+        # Draw AND gate shape:
+        path = QPainterPath()
+        path.moveTo(0, 0)          # top-left
+        path.lineTo(w/2, 0)        # top mid
+        path.arcTo(w/2, 0, w/2, h, 90, -180)  # semicircle on the right
+        path.lineTo(0, h)          # bottom-left
+        path.closeSubpath()
+
+        painter.drawPath(path)
