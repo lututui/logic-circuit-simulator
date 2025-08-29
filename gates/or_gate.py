@@ -12,11 +12,10 @@ class OrGate(GateItem):
         self.label = QGraphicsTextItem('OR', parent=self)
 
     def compute_output(self):
-        inputs = []
-        for wire in self.connected_wires:
-            if wire.dst_gate == self:  # incoming wire
-                inputs.append(wire.src_gate.state)
-        if None in inputs:  # not enough info yet
+        inputs = [t.src_gate.state for t in self.connected_inputs]
+
+        if None in inputs or len(inputs) == 0:  # not enough info yet
             return None
+
         return any(inputs)
 

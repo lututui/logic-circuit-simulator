@@ -12,11 +12,8 @@ class NotGate(GateItem):
         self.label = QGraphicsTextItem('NOT', parent=self)
 
     def compute_output(self):
-        inputs = []
-        for wire in self.connected_wires:
-            if wire.dst_gate == self:  # incoming wire
-                inputs.append(wire.src_gate.state)
-        if None in inputs or len(inputs) == 0:  # not enough info yet
+        if len(self.connected_inputs) == 0:
             return None
-        return not inputs[0]
+
+        return self.connected_inputs[0].src_gate.state
 

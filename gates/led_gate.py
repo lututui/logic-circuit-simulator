@@ -18,7 +18,7 @@ class LEDGate(GateItem):
                 self.setBrush(QBrush(QColor("red")))
 
     def compute_output(self):
-        for wire in self.connected_wires:
-            if wire.dst_gate == self:
-                return wire.src_gate.state
-        return None
+        if len(self.connected_inputs) == 0:
+            return None
+
+        return self.connected_inputs[0].src_gate.state

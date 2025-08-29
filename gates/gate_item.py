@@ -1,3 +1,5 @@
+from itertools import chain
+
 from PySide6.QtGui import QBrush, QColor
 from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsEllipseItem
 
@@ -29,7 +31,8 @@ class GateItem(QGraphicsRectItem):
             self.output_point.parent_gate = self
 
         # Keep track of connected wires
-        self.connected_wires = []
+        self.connected_inputs = []
+        self.connected_outputs = []
         self.state = None
 
     def update_graphics(self):
@@ -37,23 +40,24 @@ class GateItem(QGraphicsRectItem):
 
     def itemChange(self, change, value):
         if change == QGraphicsRectItem.GraphicsItemChange.ItemPositionChange:
-            for wire in self.connected_wires:
+            for wire in chain(self.connected_inputs, self.connected_outputs):
                 wire.update_position()
         return super().itemChange(change, value)
 
     def eval(self):
         eval_result = []
 
-        for wire in self.connected_wires:
-            if wire.src_gate == self:
-                continue
+        for wire in self.connected_inputs:
             eval_result.append(wire.src_gate.eval())
 
         return eval_result
 
     def remove(self):
-        for wire in list(self.connected_wires):
+        for wire in list(self.connected_inputs + self.connected_outputs):
             wire.remove()
+
+        for gate in self.editor.gates:
+            gate.remove()
 
         self.scene().removeItem(self)
 

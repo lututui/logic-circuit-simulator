@@ -27,8 +27,8 @@ class WireItem(QGraphicsLineItem):
         self.dst_gate = dst_gate
         self.setPen(QPen(Qt.GlobalColor.black, 2))
 
-        src_gate.connected_wires.append(self)
-        dst_gate.connected_wires.append(self)
+        src_gate.connected_outputs.append(self)
+        dst_gate.connected_inputs.append(self)
         self.update_position()
 
     def update_position(self):
@@ -37,8 +37,8 @@ class WireItem(QGraphicsLineItem):
         self.setLine(p1.x(), p1.y(), p2.x(), p2.y())
 
     def remove(self):
-        self.src_gate.connected_wires.remove(self)
-        self.dst_gate.connected_wires.remove(self)
+        self.src_gate.connected_outputs.remove(self)
+        self.dst_gate.connected_inputs.remove(self)
         self.scene().removeItem(self)
 
     def mousePressEvent(self, event, /):
@@ -117,12 +117,18 @@ class LogicCircuitEditor(QGraphicsView):
             prev_gate, prev_type = self.pending_endpoint
             if prev_type != point_type:  # only allow input→output or output→input
                 if prev_type == "output" and point_type == "input":
-                    src_gate = prev_gate
-                    dst_gate = gate
+                    src_gate, dst_gate = prev_gate, gate
                 elif prev_type == "input" and point_type == "output":
-                    src_gate = gate
-                    dst_gate = prev_gate
+                    src_gate, dst_gate = gate, prev_gate
                 else:
+                    return
+
+                if len(src_gate.connected_outputs) >= src_gate.n_outputs:
+                    self._handle_wiring_event_cancel()
+                    return
+
+                if len(dst_gate.connected_inputs) >= dst_gate.n_inputs:
+                    self._handle_wiring_event_cancel()
                     return
 
                 wire = WireItem(src_gate, dst_gate, self)
