@@ -1,7 +1,6 @@
-from PySide6.QtCore import QTimer
 from PySide6.QtGui import QBrush, QColor
 
-from gates.gate_item import GateItem
+from gate_item import GateItem
 
 
 class LEDGate(GateItem):

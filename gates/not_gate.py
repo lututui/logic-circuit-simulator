@@ -3,7 +3,7 @@ import math
 from PySide6.QtGui import QBrush, QColor, QPainterPath, QPainter, QPen
 from PySide6.QtWidgets import QGraphicsTextItem
 
-from gates.gate_item import GateItem
+from gate_item import GateItem
 
 
 class NotGate(GateItem):

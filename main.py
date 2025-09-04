@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
 
 from gates.and_gate import AndGate
 from gates.false_gate import FalseGate
-from gates.gate_item import GateItem
+from gate_item import GateItem
 from gates.led_gate import LEDGate
 from gates.or_gate import OrGate
 from gates.true_gate import TrueGate

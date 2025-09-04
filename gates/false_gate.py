@@ -2,7 +2,7 @@ import math
 
 from PySide6.QtWidgets import QGraphicsTextItem
 
-from gates.gate_item import GateItem
+from gate_item import GateItem
 
 
 class FalseGate(GateItem):

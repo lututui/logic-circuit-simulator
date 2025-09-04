@@ -1,10 +1,10 @@
 import math
 
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QColor, QPen, QBrush, QPainterPath
-from PySide6.QtWidgets import QGraphicsTextItem, QGraphicsEllipseItem
+from PySide6.QtWidgets import QGraphicsTextItem
 
-from gates.gate_item import GateItem
+from gate_item import GateItem
 
 
 class OrGate(GateItem):
