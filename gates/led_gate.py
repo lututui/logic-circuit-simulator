@@ -1,4 +1,4 @@
-from PySide6.QtGui import QBrush, QColor
+from PySide6.QtGui import QBrush, Qt
 
 from gate_item import GateItem
 
@@ -10,11 +10,11 @@ class LEDGate(GateItem):
     def update_graphics(self):
         match self.state:
             case None:
-                self.setBrush(QBrush(QColor("lightgray")))
+                self.setBrush(QBrush(Qt.GlobalColor.lightGray))
             case True:
-                self.setBrush(QBrush(QColor("green")))
+                self.setBrush(QBrush(Qt.GlobalColor.green))
             case False:
-                self.setBrush(QBrush(QColor("red")))
+                self.setBrush(QBrush(Qt.GlobalColor.red))
 
     def compute_output(self):
         if len(self.connected_inputs) == 0:

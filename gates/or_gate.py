@@ -1,7 +1,7 @@
 import math
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPainter, QColor, QPen, QBrush, QPainterPath
+from PySide6.QtGui import QPainter, QPen, QBrush, QPainterPath
 from PySide6.QtWidgets import QGraphicsTextItem
 
 from gate_item import GateItem
@@ -31,11 +31,11 @@ class OrGate(GateItem):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
 
         # nice rounded strokes
-        pen = QPen(QColor("black"), 2)
+        pen = QPen(Qt.GlobalColor.black, 2)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
         painter.setPen(pen)
-        painter.setBrush(QBrush(QColor("lightgray")))
+        painter.setBrush(QBrush(Qt.GlobalColor.lightGray))
 
         r = self.rect()
         x0, y0, w, h = r.x(), r.y(), r.width(), r.height()
@@ -73,11 +73,11 @@ class OrGate(GateItem):
         r = self.rect()
         x0, y0, w, h = r.x(), r.y(), r.width(), r.height()
         pad_left = w * 0.12
-        c1x, c2x, innerCx = w * 0.85, w * 0.98, w * 0.40
+        c1x, c2x, inner_cx = w * 0.85, w * 0.98, w * 0.40
         p = QPainterPath()
         p.moveTo(x0 + pad_left, y0)
         p.cubicTo(x0 + c1x, y0, x0 + c2x, y0 + h * 0.28, x0 + w, y0 + h * 0.5)
         p.cubicTo(x0 + c2x, y0 + h * 0.72, x0 + c1x, y0 + h, x0 + pad_left, y0 + h)
-        p.cubicTo(x0 + innerCx, y0 + h * 0.85, x0 + innerCx, y0 + h * 0.15, x0 + pad_left, y0)
+        p.cubicTo(x0 + inner_cx, y0 + h * 0.85, x0 + inner_cx, y0 + h * 0.15, x0 + pad_left, y0)
         p.closeSubpath()
         return p

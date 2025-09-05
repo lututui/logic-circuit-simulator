@@ -1,6 +1,6 @@
 import math
 
-from PySide6.QtGui import QBrush, QColor, QPainterPath, QPainter, QPen
+from PySide6.QtGui import QBrush, QColor, QPainterPath, QPainter, QPen, Qt
 from PySide6.QtWidgets import QGraphicsTextItem
 
 from gate_item import GateItem
@@ -24,8 +24,8 @@ class NotGate(GateItem):
         return self.rect().adjusted(-margin, -margin, margin + 10, margin)
 
     def paint(self, painter: QPainter, option, widget=None):
-        painter.setPen(QPen(QColor("black"), 2))
-        painter.setBrush(QBrush(QColor("lightgray")))
+        painter.setPen(QPen(Qt.GlobalColor.black, 2))
+        painter.setBrush(QBrush(Qt.GlobalColor.lightGray))
 
         w = self.rect().width()
         h = self.rect().height()
@@ -42,6 +42,5 @@ class NotGate(GateItem):
         bubble_radius = 10
         center_x = w - 10 + bubble_radius
         center_y = h / 2
-        painter.drawEllipse(center_x - bubble_radius, center_y - bubble_radius,
+        painter.drawEllipse(int(center_x - bubble_radius), int(center_y - bubble_radius),
                             bubble_radius * 2, bubble_radius * 2)
-

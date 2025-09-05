@@ -1,15 +1,21 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from editor import LogicCircuitEditor
+
 from itertools import chain
 
-from PySide6.QtGui import QBrush, QColor
+from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsEllipseItem
 
 
 class GateItem(QGraphicsRectItem):
-    def __init__(self, x, y, n_inputs, n_outputs, editor, w=80, h=50):
+    def __init__(self, x: int, y: int, n_inputs: float, n_outputs: float, editor: 'LogicCircuitEditor', w: int = 80,
+                 h: int = 50):
         super().__init__(0, 0, w, h)
         self.editor = editor
         self.setPos(x, y)
-        self.setBrush(QBrush(QColor("lightgray")))
+        self.setBrush(Qt.GlobalColor.lightGray)
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsMovable)
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemSendsGeometryChanges)
 
@@ -33,7 +39,7 @@ class GateItem(QGraphicsRectItem):
 
         # Input point (blue, left side)
         self.input_point = QGraphicsEllipseItem(-5, h / 2 - 5, 10, 10, self)
-        self.input_point.setBrush(QBrush(QColor("blue")))
+        self.input_point.setBrush(Qt.GlobalColor.blue)
         self.input_point.setData(0, "input")
         self.input_point.parent_gate = self
 
@@ -43,10 +49,9 @@ class GateItem(QGraphicsRectItem):
 
         # Output point (red, right side)
         self.output_point = QGraphicsEllipseItem(w - 5, h / 2 - 5, 10, 10, self)
-        self.output_point.setBrush(QBrush(QColor("red")))
+        self.output_point.setBrush(Qt.GlobalColor.red)
         self.output_point.setData(0, "output")
         self.output_point.parent_gate = self
-
 
     def update_graphics(self):
         return
@@ -79,4 +84,3 @@ class GateItem(QGraphicsRectItem):
             self.remove()
 
         super().mousePressEvent(event)
-

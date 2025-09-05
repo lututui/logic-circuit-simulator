@@ -1,6 +1,6 @@
 import math
 
-from PySide6.QtGui import QPainter, QPen, QColor, QBrush, QPainterPath
+from PySide6.QtGui import QPainter, QPen, QBrush, QPainterPath, Qt
 from PySide6.QtWidgets import QGraphicsTextItem
 
 from gate_item import GateItem
@@ -21,8 +21,8 @@ class AndGate(GateItem):
         return all(inputs)
 
     def paint(self, painter: QPainter, option, widget=None):
-        painter.setPen(QPen(QColor("black"), 2))
-        painter.setBrush(QBrush(QColor("lightgray")))
+        painter.setPen(QPen(Qt.GlobalColor.black, 2))
+        painter.setBrush(QBrush(Qt.GlobalColor.lightGray))
 
         w = self.rect().width()
         h = self.rect().height()
