@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
 )
 
 from editor import LogicCircuitEditor
-from toolbar_action import Toolbar
+from toolbar import Toolbar
 
 
 class LogicCircuitSimulatorWindow(QMainWindow):
