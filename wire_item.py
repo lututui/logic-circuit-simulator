@@ -22,6 +22,7 @@ class WireItem(QGraphicsLineItem):
         src_gate.connected_outputs.append(self)
         dst_gate.connected_inputs.append(self)
         self.update_position()
+        self.setZValue(-1)
 
     def update_position(self):
         p1 = self.src_gate.output_point.sceneBoundingRect().center()
