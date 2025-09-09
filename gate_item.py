@@ -10,6 +10,8 @@ from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsEllipseItem
 
 
 class GateItem(QGraphicsRectItem):
+    registry = {}
+
     def __init__(self, x: int, y: int, n_inputs: float, n_outputs: float, editor: 'LogicCircuitEditor', w: int = 80,
                  h: int = 50):
         super().__init__(0, 0, w, h)
@@ -32,6 +34,10 @@ class GateItem(QGraphicsRectItem):
         self.connected_inputs = []
         self.connected_outputs = []
         self.state = None
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        GateItem.registry[cls.__name__] = cls
 
     def add_input_point(self, h, w):
         if self.n_inputs <= 0:

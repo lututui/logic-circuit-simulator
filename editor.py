@@ -138,7 +138,7 @@ class LogicCircuitEditor(QGraphicsView):
             }
 
             gate = possible_gates.get(self.current_tool)
-            new_gate = gate(scene_pos.x() - 40, scene_pos.y() - 20, self)
+            new_gate = gate(int(scene_pos.x() - 40), int(scene_pos.y() - 20), self)
 
             self.gates.append(new_gate)
             self.scene.addItem(new_gate)
@@ -160,3 +160,61 @@ class LogicCircuitEditor(QGraphicsView):
             self.temp_line.setLine(start.x(), start.y(), end.x(), end.y())
 
         super().mouseMoveEvent(event)
+
+    def serialize(self):
+        gates_data = []
+        wires_data = []
+
+        # Give each gate a unique id
+        gate_to_id = {gate: i for i, gate in enumerate(self.gates)}
+
+        for i, gate in enumerate(self.gates):
+            gates_data.append({
+                "id": i,
+                "type": gate.__class__.__name__,
+                "x": gate.pos().x(),
+                "y": gate.pos().y()
+            })
+
+        for gate in self.gates:
+            for wire in gate.connected_outputs:
+                wires_data.append({
+                    "src": gate_to_id[wire.src_gate],
+                    "dst": gate_to_id[wire.dst_gate]
+                })
+
+        return {
+            "gates": gates_data,
+            "wires": wires_data
+        }
+
+    def deserialize(self, data):
+        # Clear existing scene
+        self.scene.clear()
+        self.gates.clear()
+
+        gate_map = {}
+
+        # Rebuild gates
+        for g in data.get("gates", []):
+            gate_type = g["type"]
+            x, y = g["x"], g["y"]
+
+            gate_cls = GateItem.registry.get(gate_type)
+
+            if not gate_cls:
+                raise RuntimeError(f'Unknown gate: {gate_type}')
+
+            gate = gate_cls(x, y, self)
+
+            self.gates.append(gate)
+            self.scene.addItem(gate)
+            gate_map[g["id"]] = gate
+
+        # Rebuild wires
+        for w in data.get("wires", []):
+            src = gate_map.get(w["src"])
+            dst = gate_map.get(w["dst"])
+            if src and dst:
+                wire = WireItem(src, dst, self)
+                self.scene.addItem(wire)
