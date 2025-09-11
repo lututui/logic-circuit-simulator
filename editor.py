@@ -165,9 +165,6 @@ class LogicCircuitEditor(QGraphicsView):
         gates_data = []
         wires_data = []
 
-        # Give each gate a unique id
-        gate_to_id = {gate: i for i, gate in enumerate(self.gates)}
-
         for i, gate in enumerate(self.gates):
             gates_data.append({
                 "id": i,
@@ -175,6 +172,9 @@ class LogicCircuitEditor(QGraphicsView):
                 "x": gate.pos().x(),
                 "y": gate.pos().y()
             })
+
+        # Give each gate a unique id
+        gate_to_id = {gate: i for i, gate in enumerate(self.gates)}
 
         for gate in self.gates:
             for wire in gate.connected_outputs:

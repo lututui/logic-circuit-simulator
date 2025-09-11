@@ -68,20 +68,11 @@ class GateItem(QGraphicsRectItem):
                 wire.update_position()
         return super().itemChange(change, value)
 
-    def eval(self):
-        eval_result = []
-
-        for wire in self.connected_inputs:
-            eval_result.append(wire.src_gate.eval())
-
-        return eval_result
-
     def remove(self):
         for wire in list(self.connected_inputs + self.connected_outputs):
             wire.remove()
 
-        for gate in self.editor.gates:
-            gate.remove()
+        self.editor.gates.remove(self)
 
         self.scene().removeItem(self)
 
